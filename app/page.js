@@ -3,12 +3,11 @@
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Instagram,
+  Camera,
   MessageCircle,
   Radio,
   Sparkles,
   Play,
-  Users,
   ArrowUpRight,
 } from "lucide-react";
 
