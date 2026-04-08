@@ -9,7 +9,7 @@ function formatFollowers(value) {
 }
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
+  hidden: { opacity: 0, y: 24 },
   show: { opacity: 1, y: 0 },
 };
 
@@ -17,7 +17,7 @@ const stagger = {
   hidden: {},
   show: {
     transition: {
-      staggerChildren: 0.1,
+      staggerChildren: 0.08,
     },
   },
 };
@@ -25,12 +25,12 @@ const stagger = {
 function FloatingParticles() {
   const particles = useMemo(
     () =>
-      Array.from({ length: 24 }, (_, i) => ({
+      Array.from({ length: 20 }, (_, i) => ({
         id: i,
         left: `${Math.random() * 100}%`,
         top: `${Math.random() * 100}%`,
         size: 2 + Math.random() * 4,
-        duration: 5 + Math.random() * 6,
+        duration: 5 + Math.random() * 5,
         delay: Math.random() * 4,
       })),
     []
@@ -55,14 +55,14 @@ function FloatingParticles() {
             width: p.size,
             height: p.size,
             borderRadius: "999px",
-            background: "rgba(255,255,255,0.85)",
-            boxShadow: "0 0 20px rgba(255,80,170,0.35)",
+            background: "rgba(255,255,255,0.8)",
+            boxShadow: "0 0 18px rgba(255,80,170,0.28)",
           }}
           animate={{
-            y: [0, -26, 0],
+            y: [0, -24, 0],
             x: [0, p.id % 2 === 0 ? 8 : -8, 0],
-            opacity: [0.08, 0.7, 0.12],
-            scale: [1, 1.2, 1],
+            opacity: [0.08, 0.55, 0.1],
+            scale: [1, 1.15, 1],
           }}
           transition={{
             duration: p.duration,
@@ -81,10 +81,11 @@ export default function Page() {
   const [error, setError] = useState("");
   const [displayFollowers, setDisplayFollowers] = useState(0);
   const [updatedAt, setUpdatedAt] = useState("");
-  const [isOnline, setIsOnline] = useState(true);
+  const [status, setStatus] = useState("loading"); // loading | online | stale | offline
 
   const animatedValueRef = useRef(0);
   const animationRef = useRef(null);
+  const hasLoadedOnceRef = useRef(false);
 
   const socials = [
     {
@@ -115,8 +116,18 @@ export default function Page() {
 
   async function cargarStats() {
     try {
-      const res = await fetch("/api/stats", { cache: "no-store" });
-      const data = await res.json();
+      const res = await fetch("/api/stats", {
+        cache: "no-store",
+      });
+
+      const rawText = await res.text();
+
+      let data;
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        throw new Error("La API devolvió una respuesta inválida");
+      }
 
       if (!res.ok) {
         throw new Error(data?.error || "No se pudieron cargar las estadísticas");
@@ -125,14 +136,22 @@ export default function Page() {
       if (data?.data?.user) {
         setUser(data.data.user);
         setUpdatedAt(new Date().toLocaleTimeString("es-EC"));
-        setIsOnline(true);
+        setStatus("online");
         setError("");
+        hasLoadedOnceRef.current = true;
       } else {
-        setIsOnline(false);
+        throw new Error("Respuesta inválida de la API");
       }
     } catch (err) {
-      setError(err.message || "Error cargando estadísticas");
-      setIsOnline(false);
+      const message = err?.message || "Error cargando estadísticas";
+
+      if (hasLoadedOnceRef.current && user) {
+        setStatus("stale");
+        setError(`Último dato conservado. ${message}`);
+      } else {
+        setStatus("offline");
+        setError(message);
+      }
     }
   }
 
@@ -147,7 +166,10 @@ export default function Page() {
 
     const start = animatedValueRef.current;
     const target = user.follower_count;
-    const duration = 900;
+
+    if (start === target) return;
+
+    const duration = 1100;
     const startTime = performance.now();
 
     const animate = (time) => {
@@ -359,10 +381,7 @@ export default function Page() {
                     Ver contenido
                   </a>
 
-                  <a
-                    href="#contacto"
-                    style={secondaryButton}
-                  >
+                  <a href="#contacto" style={secondaryButton}>
                     Trabajar conmigo
                   </a>
                 </motion.div>
@@ -421,9 +440,7 @@ export default function Page() {
                       }}
                     >
                       <div>
-                        <div style={miniBadge}>
-                          retrato oficial
-                        </div>
+                        <div style={miniBadge}>retrato oficial</div>
 
                         <p
                           style={{
@@ -495,6 +512,7 @@ export default function Page() {
                     target="_blank"
                     rel="noreferrer"
                     whileHover={{ y: -4 }}
+                    transition={{ duration: 0.22 }}
                     style={socialCard}
                   >
                     <div
@@ -519,9 +537,7 @@ export default function Page() {
                       {item.label}
                     </div>
 
-                    <div style={pill}>
-                      {item.action}
-                    </div>
+                    <div style={pill}>{item.action}</div>
                   </motion.a>
                 ))}
               </div>
@@ -566,18 +582,24 @@ export default function Page() {
                   </div>
 
                   <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "16px" }}>
-                    <div style={tiktokBadge}>
-                      TikTok
-                    </div>
+                    <div style={tiktokBadge}>TikTok</div>
 
                     <div
                       style={
-                        isOnline
+                        status === "online"
                           ? onlineBadge
+                          : status === "stale"
+                          ? staleBadge
                           : offlineBadge
                       }
                     >
-                      {isOnline ? "online" : "offline"}
+                      {status === "online"
+                        ? "online"
+                        : status === "stale"
+                        ? "último dato"
+                        : status === "loading"
+                        ? "cargando"
+                        : "offline"}
                     </div>
                   </div>
                 </div>
@@ -588,19 +610,33 @@ export default function Page() {
                 </div>
               </div>
 
-              <div
+              <motion.div
+                animate={{
+                  textShadow:
+                    status === "online"
+                      ? [
+                          "0 0 18px rgba(255,78,164,0.20)",
+                          "0 0 36px rgba(255,78,164,0.34)",
+                          "0 0 18px rgba(255,78,164,0.20)",
+                        ]
+                      : "0 0 18px rgba(255,255,255,0.08)",
+                }}
+                transition={{
+                  duration: 2.4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
                 style={{
                   marginTop: "34px",
                   fontSize: "clamp(54px, 10vw, 108px)",
                   lineHeight: 0.95,
                   fontWeight: 900,
                   letterSpacing: "-0.04em",
-                  color: "#ff4ea4",
-                  textShadow: "0 0 36px rgba(255,78,164,0.34)",
+                  color: status === "offline" ? "#ffffff" : "#ff4ea4",
                 }}
               >
                 {formatFollowers(displayFollowers)}
-              </div>
+              </motion.div>
 
               <div
                 style={{
@@ -637,9 +673,9 @@ export default function Page() {
                 <div
                   style={{
                     marginTop: "18px",
-                    color: "#ff9b9b",
+                    color: status === "stale" ? "#ffd58a" : "#ff9b9b",
                     fontSize: "13px",
-                    opacity: 0.9,
+                    opacity: 0.92,
                   }}
                 >
                   {error}
@@ -834,6 +870,21 @@ const onlineBadge = {
   background: "rgba(34,211,238,0.1)",
   border: "1px solid rgba(34,211,238,0.22)",
   color: "#6ee7ff",
+  fontSize: "11px",
+  letterSpacing: "0.18em",
+  textTransform: "uppercase",
+  fontWeight: 800,
+};
+
+const staleBadge = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "10px",
+  padding: "10px 14px",
+  borderRadius: "999px",
+  background: "rgba(255,190,60,0.1)",
+  border: "1px solid rgba(255,190,60,0.22)",
+  color: "#ffd58a",
   fontSize: "11px",
   letterSpacing: "0.18em",
   textTransform: "uppercase",
