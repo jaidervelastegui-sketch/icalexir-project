@@ -17,7 +17,7 @@ function formatFollowers(value) {
 }
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 0, y: 34 },
   show: { opacity: 1, y: 0 },
 };
 
@@ -25,7 +25,8 @@ const stagger = {
   hidden: {},
   show: {
     transition: {
-      staggerChildren: 0.08,
+      staggerChildren: 0.12,
+      delayChildren: 0.08,
     },
   },
 };
@@ -33,7 +34,7 @@ const stagger = {
 function FloatingParticles() {
   const particles = useMemo(
     () =>
-      Array.from({ length: 20 }, (_, i) => ({
+      Array.from({ length: 18 }, (_, i) => ({
         id: i,
         left: `${Math.random() * 100}%`,
         top: `${Math.random() * 100}%`,
@@ -63,12 +64,12 @@ function FloatingParticles() {
             width: p.size,
             height: p.size,
             borderRadius: "999px",
-            background: "rgba(255,255,255,0.8)",
-            boxShadow: "0 0 18px rgba(255,80,170,0.28)",
+            background: "rgba(255,255,255,0.78)",
+            boxShadow: "0 0 18px rgba(255,80,170,0.22)",
           }}
           animate={{
-            y: [0, -24, 0],
-            x: [0, p.id % 2 === 0 ? 8 : -8, 0],
+            y: [0, -22, 0],
+            x: [0, p.id % 2 === 0 ? 7 : -7, 0],
             opacity: [0.08, 0.55, 0.1],
             scale: [1, 1.15, 1],
           }}
@@ -81,6 +82,63 @@ function FloatingParticles() {
         />
       ))}
     </div>
+  );
+}
+
+function InteractiveCard({ children, href, style, delay = 0, target = "_blank", rel = "noreferrer" }) {
+  const [glow, setGlow] = useState({ x: "50%", y: "50%", visible: 0 });
+
+  return (
+    <motion.a
+      href={href}
+      target={target}
+      rel={rel}
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.16 }}
+      transition={{ duration: 0.5, delay }}
+      whileHover={{ y: -8, scale: 1.018 }}
+      whileTap={{ scale: 0.992 }}
+      onMouseMove={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        setGlow({
+          x: `${e.clientX - rect.left}px`,
+          y: `${e.clientY - rect.top}px`,
+          visible: 1,
+        });
+      }}
+      onMouseEnter={() => setGlow((g) => ({ ...g, visible: 1 }))}
+      onMouseLeave={() => setGlow((g) => ({ ...g, visible: 0 }))}
+      style={{
+        ...style,
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          opacity: glow.visible,
+          transition: "opacity 0.28s ease",
+          pointerEvents: "none",
+          background: `radial-gradient(240px circle at ${glow.x} ${glow.y}, rgba(255,90,170,0.18), transparent 42%)`,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          borderRadius: "inherit",
+          boxShadow: glow.visible
+            ? "inset 0 0 0 1px rgba(255,255,255,0.14), 0 24px 70px rgba(255,90,170,0.10)"
+            : "inset 0 0 0 1px rgba(255,255,255,0.02)",
+          transition: "all 0.28s ease",
+          pointerEvents: "none",
+        }}
+      />
+      <div style={{ position: "relative", zIndex: 2 }}>{children}</div>
+    </motion.a>
   );
 }
 
@@ -104,12 +162,12 @@ export default function Page() {
       icon: Play,
     },
     {
-  label: "Instagram",
-  note: "MARCA PERSONAL",
-  action: "Ver perfil",
-  href: "https://www.instagram.com/icalexir/",
-  icon: Camera,
-},
+      label: "Instagram",
+      note: "MARCA PERSONAL",
+      action: "Ver perfil",
+      href: "https://www.instagram.com/icalexir/",
+      icon: Camera,
+    },
     {
       label: "Kick",
       note: "STREAM EN VIVO",
@@ -293,13 +351,18 @@ export default function Page() {
                 alignItems: "center",
               }}
             >
-              <motion.div variants={stagger} initial="hidden" animate="show">
+              <motion.div
+                variants={stagger}
+                initial="hidden"
+                animate="show"
+              >
                 <motion.div variants={fadeUp} style={badge}>
                   Creador de contenido
                 </motion.div>
 
                 <motion.h1
                   variants={fadeUp}
+                  transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
                   style={{
                     margin: "22px 0 0 0",
                     fontSize: "clamp(56px, 10vw, 118px)",
@@ -314,6 +377,7 @@ export default function Page() {
 
                 <motion.div
                   variants={fadeUp}
+                  transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
                   style={{
                     marginTop: "16px",
                     fontSize: "clamp(16px, 2.4vw, 24px)",
@@ -328,6 +392,7 @@ export default function Page() {
 
                 <motion.h2
                   variants={fadeUp}
+                  transition={{ duration: 0.82, ease: [0.22, 1, 0.36, 1] }}
                   style={{
                     margin: "30px 0 0 0",
                     fontSize: "clamp(34px, 5.5vw, 72px)",
@@ -352,6 +417,7 @@ export default function Page() {
 
                 <motion.p
                   variants={fadeUp}
+                  transition={{ duration: 0.82, ease: [0.22, 1, 0.36, 1] }}
                   style={{
                     marginTop: "22px",
                     maxWidth: "670px",
@@ -373,8 +439,13 @@ export default function Page() {
                   }}
                 >
                   <motion.a
-                    whileHover={{ y: -2, scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{
+                      y: -2,
+                      scale: 1.02,
+                      boxShadow: "0 0 42px rgba(255,78,164,0.38)",
+                    }}
+                    whileTap={{ scale: 0.985 }}
+                    transition={{ duration: 0.22 }}
                     href="https://www.instagram.com/channel/AbaWPIu14iKSAHJD/"
                     target="_blank"
                     rel="noreferrer"
@@ -384,8 +455,14 @@ export default function Page() {
                   </motion.a>
 
                   <motion.a
-                    whileHover={{ y: -2, scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{
+                      y: -2,
+                      scale: 1.02,
+                      boxShadow: "0 0 28px rgba(255,255,255,0.08)",
+                      borderColor: "rgba(255,255,255,0.22)",
+                    }}
+                    whileTap={{ scale: 0.985 }}
+                    transition={{ duration: 0.22 }}
                     href="#contacto"
                     style={secondaryButton}
                   >
@@ -395,12 +472,14 @@ export default function Page() {
               </motion.div>
 
               <motion.div
-                initial={{ opacity: 0, y: 26, scale: 0.985 }}
+                initial={{ opacity: 0, y: 30, scale: 0.982 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.7, delay: 0.12 }}
+                transition={{ duration: 0.9, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
               >
                 <div style={glassWrap}>
-                  <div
+                  <motion.div
+                    whileHover={{ scale: 1.01 }}
+                    transition={{ duration: 0.35 }}
                     style={{
                       position: "relative",
                       overflow: "hidden",
@@ -421,7 +500,7 @@ export default function Page() {
                         display: "block",
                         objectFit: "cover",
                         objectPosition: "center",
-                        transition: "transform 0.6s ease",
+                        transition: "transform 0.7s ease",
                       }}
                     />
 
@@ -478,7 +557,7 @@ export default function Page() {
                         <div style={statusValue}>creativo activo</div>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
               </motion.div>
             </div>
@@ -502,9 +581,9 @@ export default function Page() {
             >
               <div
                 style={{
-                  color: "rgba(255,255,255,0.38)",
+                  color: "rgba(255,255,255,0.42)",
                   fontSize: "12px",
-                  letterSpacing: "0.08em",
+                  letterSpacing: "0.02em",
                   lineHeight: 1.7,
                 }}
               >
@@ -534,16 +613,10 @@ export default function Page() {
                   const Icon = item.icon;
 
                   return (
-                    <motion.a
+                    <InteractiveCard
                       key={item.label}
                       href={item.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      initial={{ opacity: 0, y: 24 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, amount: 0.15 }}
-                      transition={{ duration: 0.45, delay: index * 0.06 }}
-                      whileHover={{ y: -8, scale: 1.015 }}
+                      delay={index * 0.06}
                       style={socialCard}
                     >
                       <div
@@ -556,7 +629,7 @@ export default function Page() {
                       >
                         <div
                           style={{
-                            color: "rgba(255,255,255,0.38)",
+                            color: "rgba(255,255,255,0.4)",
                             fontSize: "11px",
                             letterSpacing: "0.18em",
                             textTransform: "uppercase",
@@ -565,9 +638,13 @@ export default function Page() {
                           {item.note}
                         </div>
 
-                        <div style={iconWrap}>
+                        <motion.div
+                          whileHover={{ scale: 1.08, rotate: -4 }}
+                          transition={{ duration: 0.22 }}
+                          style={iconWrap}
+                        >
                           <Icon size={18} strokeWidth={2.1} />
-                        </div>
+                        </motion.div>
                       </div>
 
                       <div
@@ -581,7 +658,9 @@ export default function Page() {
                         {item.label}
                       </div>
 
-                      <div
+                      <motion.div
+                        whileHover={{ x: 2 }}
+                        transition={{ duration: 0.2 }}
                         style={{
                           marginTop: "18px",
                           display: "inline-flex",
@@ -601,8 +680,8 @@ export default function Page() {
                       >
                         {item.action}
                         <ArrowUpRight size={14} />
-                      </div>
-                    </motion.a>
+                      </motion.div>
+                    </InteractiveCard>
                   );
                 })}
               </div>
@@ -920,8 +999,6 @@ const socialCard = {
   boxSizing: "border-box",
   boxShadow: "0 16px 50px rgba(0,0,0,0.28)",
   transition: "all 0.32s ease",
-  position: "relative",
-  overflow: "hidden",
 };
 
 const iconWrap = {
