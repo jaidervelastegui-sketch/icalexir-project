@@ -3,12 +3,11 @@
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Instagram,
+  Camera,
   MessageCircle,
   Radio,
   Sparkles,
   Play,
-  Users,
   ArrowUpRight,
 } from "lucide-react";
 
@@ -105,12 +104,12 @@ export default function Page() {
       icon: Play,
     },
     {
-      label: "Instagram",
-      note: "MARCA PERSONAL",
-      action: "Ver perfil",
-      href: "https://www.instagram.com/icalexir/",
-      icon: Instagram,
-    },
+  label: "Instagram",
+  note: "MARCA PERSONAL",
+  action: "Ver perfil",
+  href: "https://www.instagram.com/icalexir/",
+  icon: Camera,
+},
     {
       label: "Kick",
       note: "STREAM EN VIVO",
