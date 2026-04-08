@@ -2,6 +2,15 @@
 
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  Instagram,
+  MessageCircle,
+  Radio,
+  Sparkles,
+  Play,
+  Users,
+  ArrowUpRight,
+} from "lucide-react";
 
 function formatFollowers(value) {
   if (value == null) return "--";
@@ -81,7 +90,7 @@ export default function Page() {
   const [error, setError] = useState("");
   const [displayFollowers, setDisplayFollowers] = useState(0);
   const [updatedAt, setUpdatedAt] = useState("");
-  const [status, setStatus] = useState("loading"); // loading | online | stale | offline
+  const [status, setStatus] = useState("loading");
 
   const animatedValueRef = useRef(0);
   const animationRef = useRef(null);
@@ -90,27 +99,31 @@ export default function Page() {
   const socials = [
     {
       label: "TikTok",
-      note: "contenido corto",
-      action: "Ver videos",
+      note: "VIDEOS VIRALES",
+      action: "Ver contenido",
       href: "https://www.tiktok.com/@icalexir",
+      icon: Play,
     },
     {
       label: "Instagram",
-      note: "identidad visual",
+      note: "MARCA PERSONAL",
       action: "Ver perfil",
       href: "https://www.instagram.com/icalexir/",
+      icon: Instagram,
     },
     {
       label: "Kick",
-      note: "directos",
+      note: "STREAM EN VIVO",
       action: "Ver stream",
       href: "https://kick.com/icalexirk",
+      icon: Radio,
     },
     {
       label: "WhatsApp",
-      note: "contacto directo",
-      action: "Escríbeme ahora",
+      note: "TRABAJA CONMIGO",
+      action: "Escríbeme",
       href: "https://wa.me/593978997065",
+      icon: MessageCircle,
     },
   ];
 
@@ -247,22 +260,11 @@ export default function Page() {
               style={{
                 fontSize: "20px",
                 fontWeight: 900,
-                letterSpacing: "0.28em",
-                textTransform: "uppercase",
+                letterSpacing: "0.04em",
+                textTransform: "lowercase",
               }}
             >
-              ICALΞIR
-            </div>
-            <div
-              style={{
-                marginTop: "6px",
-                fontSize: "11px",
-                color: "rgba(255,255,255,0.4)",
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-              }}
-            >
-              @{user?.username || "icalexir"}
+              icalexir
             </div>
           </div>
 
@@ -294,7 +296,7 @@ export default function Page() {
             >
               <motion.div variants={stagger} initial="hidden" animate="show">
                 <motion.div variants={fadeUp} style={badge}>
-                  diseño · contenido · presencia
+                  Creador de contenido
                 </motion.div>
 
                 <motion.h1
@@ -308,36 +310,35 @@ export default function Page() {
                     textTransform: "uppercase",
                   }}
                 >
-                  Alexis Ger
+                  ALEXIS GER
                 </motion.h1>
 
                 <motion.div
                   variants={fadeUp}
                   style={{
-                    marginTop: "14px",
-                    fontSize: "clamp(20px, 4vw, 38px)",
-                    fontWeight: 900,
-                    letterSpacing: "0.26em",
-                    textTransform: "uppercase",
-                    color: "#ffffff",
+                    marginTop: "16px",
+                    fontSize: "clamp(16px, 2.4vw, 24px)",
+                    fontWeight: 700,
+                    letterSpacing: "0.04em",
+                    textTransform: "lowercase",
+                    color: "rgba(255,255,255,0.72)",
                   }}
                 >
-                  ICALΞIR
+                  icalexir
                 </motion.div>
 
                 <motion.h2
                   variants={fadeUp}
                   style={{
                     margin: "30px 0 0 0",
-                    fontSize: "clamp(38px, 6vw, 76px)",
-                    lineHeight: 0.9,
+                    fontSize: "clamp(34px, 5.5vw, 72px)",
+                    lineHeight: 0.95,
                     fontWeight: 900,
                     letterSpacing: "-0.04em",
-                    textTransform: "uppercase",
-                    maxWidth: "720px",
+                    maxWidth: "760px",
                   }}
                 >
-                  Aquí empieza
+                  Si no destaca,
                   <span
                     style={{
                       display: "block",
@@ -346,7 +347,7 @@ export default function Page() {
                       color: "transparent",
                     }}
                   >
-                    todo
+                    no existe.
                   </span>
                 </motion.h2>
 
@@ -372,18 +373,25 @@ export default function Page() {
                     marginTop: "30px",
                   }}
                 >
-                  <a
+                  <motion.a
+                    whileHover={{ y: -2, scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     href="https://www.instagram.com/channel/AbaWPIu14iKSAHJD/"
                     target="_blank"
                     rel="noreferrer"
                     style={primaryButton}
                   >
                     Ver contenido
-                  </a>
+                  </motion.a>
 
-                  <a href="#contacto" style={secondaryButton}>
+                  <motion.a
+                    whileHover={{ y: -2, scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    href="#contacto"
+                    style={secondaryButton}
+                  >
                     Trabajar conmigo
-                  </a>
+                  </motion.a>
                 </motion.div>
               </motion.div>
 
@@ -414,6 +422,7 @@ export default function Page() {
                         display: "block",
                         objectFit: "cover",
                         objectPosition: "center",
+                        transition: "transform 0.6s ease",
                       }}
                     />
 
@@ -423,6 +432,15 @@ export default function Page() {
                         inset: 0,
                         background:
                           "linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.16), transparent)",
+                      }}
+                    />
+
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        boxShadow: "inset 0 0 120px rgba(255,80,170,0.12)",
+                        pointerEvents: "none",
                       }}
                     />
 
@@ -440,7 +458,9 @@ export default function Page() {
                       }}
                     >
                       <div>
-                        <div style={miniBadge}>retrato oficial</div>
+                        <div style={miniBadge}>
+                          retrato oficial
+                        </div>
 
                         <p
                           style={{
@@ -474,16 +494,22 @@ export default function Page() {
               padding: "0 24px 70px",
             }}
           >
-            <div style={glassWrap}>
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.55 }}
+              style={glassWrap}
+            >
               <div
                 style={{
                   color: "rgba(255,255,255,0.38)",
                   fontSize: "12px",
-                  letterSpacing: "0.3em",
-                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  lineHeight: 1.7,
                 }}
               >
-                ecosistema social
+                Cada plataforma, una forma distinta de destacar
               </div>
 
               <div
@@ -505,43 +531,83 @@ export default function Page() {
                   marginTop: "24px",
                 }}
               >
-                {socials.map((item) => (
-                  <motion.a
-                    key={item.label}
-                    href={item.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    whileHover={{ y: -4 }}
-                    transition={{ duration: 0.22 }}
-                    style={socialCard}
-                  >
-                    <div
-                      style={{
-                        color: "rgba(255,255,255,0.38)",
-                        fontSize: "11px",
-                        letterSpacing: "0.22em",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      {item.note}
-                    </div>
+                {socials.map((item, index) => {
+                  const Icon = item.icon;
 
-                    <div
-                      style={{
-                        marginTop: "14px",
-                        fontSize: "26px",
-                        fontWeight: 800,
-                        textTransform: "uppercase",
-                      }}
+                  return (
+                    <motion.a
+                      key={item.label}
+                      href={item.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      initial={{ opacity: 0, y: 24 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.15 }}
+                      transition={{ duration: 0.45, delay: index * 0.06 }}
+                      whileHover={{ y: -8, scale: 1.015 }}
+                      style={socialCard}
                     >
-                      {item.label}
-                    </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "start",
+                          gap: "12px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            color: "rgba(255,255,255,0.38)",
+                            fontSize: "11px",
+                            letterSpacing: "0.18em",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          {item.note}
+                        </div>
 
-                    <div style={pill}>{item.action}</div>
-                  </motion.a>
-                ))}
+                        <div style={iconWrap}>
+                          <Icon size={18} strokeWidth={2.1} />
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop: "18px",
+                          fontSize: "26px",
+                          fontWeight: 800,
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        {item.label}
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop: "18px",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          padding: "10px 14px",
+                          borderRadius: "999px",
+                          border: "1px solid rgba(255,255,255,0.1)",
+                          background: "rgba(0,0,0,0.22)",
+                          fontSize: "11px",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.18em",
+                          color: "rgba(255,255,255,0.78)",
+                          transition: "all 0.28s ease",
+                          boxShadow: "0 0 0 rgba(0,0,0,0)",
+                        }}
+                      >
+                        {item.action}
+                        <ArrowUpRight size={14} />
+                      </div>
+                    </motion.a>
+                  );
+                })}
               </div>
-            </div>
+            </motion.div>
           </div>
         </section>
 
@@ -694,35 +760,55 @@ export default function Page() {
               textAlign: "center",
             }}
           >
-            <div
-              style={{
-                fontSize: "12px",
-                letterSpacing: "0.26em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,0.36)",
-              }}
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
             >
-              contacto / acceso
-            </div>
+              <div
+                style={{
+                  fontSize: "12px",
+                  letterSpacing: "0.26em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.36)",
+                }}
+              >
+                contacto / acceso
+              </div>
 
-            <a
-              href="https://www.instagram.com/icalexir/"
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                display: "inline-block",
-                marginTop: "18px",
-                color: "#ffffff",
-                textDecoration: "none",
-                fontSize: "clamp(28px, 5vw, 52px)",
-                lineHeight: 1,
-                fontWeight: 900,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-              }}
-            >
-              @icalexir
-            </a>
+              <a
+                href="https://www.instagram.com/icalexir/"
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  display: "inline-block",
+                  marginTop: "18px",
+                  color: "#ffffff",
+                  textDecoration: "none",
+                  fontSize: "clamp(28px, 5vw, 52px)",
+                  lineHeight: 1,
+                  fontWeight: 900,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                }}
+              >
+                @icalexir
+              </a>
+
+              <div
+                style={{
+                  marginTop: "16px",
+                  display: "flex",
+                  justifyContent: "center",
+                }}
+              >
+                <div style={footerGlow}>
+                  <Sparkles size={14} />
+                  presencia digital con intención
+                </div>
+              </div>
+            </motion.div>
           </div>
         </section>
       </main>
@@ -736,6 +822,7 @@ const navLink = {
   fontSize: "12px",
   letterSpacing: "0.18em",
   textTransform: "uppercase",
+  transition: "all 0.28s ease",
 };
 
 const badge = {
@@ -746,10 +833,10 @@ const badge = {
   borderRadius: "999px",
   border: "1px solid rgba(255,255,255,0.1)",
   background: "rgba(255,255,255,0.04)",
-  color: "rgba(255,255,255,0.62)",
-  textTransform: "uppercase",
-  letterSpacing: "0.22em",
-  fontSize: "11px",
+  color: "rgba(255,255,255,0.72)",
+  letterSpacing: "0.04em",
+  fontSize: "12px",
+  boxShadow: "0 0 24px rgba(255,255,255,0.03)",
 };
 
 const glassWrap = {
@@ -773,6 +860,7 @@ const primaryButton = {
   textTransform: "uppercase",
   boxShadow: "0 0 40px rgba(209,0,113,0.35)",
   fontSize: "13px",
+  transition: "all 0.28s ease",
 };
 
 const secondaryButton = {
@@ -785,6 +873,7 @@ const secondaryButton = {
   letterSpacing: "0.18em",
   textTransform: "uppercase",
   fontSize: "13px",
+  transition: "all 0.28s ease",
 };
 
 const miniBadge = {
@@ -831,19 +920,21 @@ const socialCard = {
   padding: "20px",
   boxSizing: "border-box",
   boxShadow: "0 16px 50px rgba(0,0,0,0.28)",
+  transition: "all 0.32s ease",
+  position: "relative",
+  overflow: "hidden",
 };
 
-const pill = {
-  marginTop: "18px",
-  display: "inline-block",
-  padding: "10px 14px",
-  borderRadius: "999px",
+const iconWrap = {
+  width: "38px",
+  height: "38px",
+  display: "grid",
+  placeItems: "center",
+  borderRadius: "14px",
+  background: "rgba(255,255,255,0.06)",
   border: "1px solid rgba(255,255,255,0.1)",
-  background: "rgba(0,0,0,0.22)",
-  fontSize: "11px",
-  textTransform: "uppercase",
-  letterSpacing: "0.18em",
-  color: "rgba(255,255,255,0.72)",
+  color: "#ffffff",
+  boxShadow: "0 0 20px rgba(255,80,170,0.08)",
 };
 
 const tiktokBadge = {
@@ -948,4 +1039,19 @@ const infoValue = {
   marginTop: "10px",
   fontSize: "20px",
   fontWeight: 800,
+};
+
+const footerGlow = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "8px",
+  padding: "10px 14px",
+  borderRadius: "999px",
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  color: "rgba(255,255,255,0.72)",
+  fontSize: "12px",
+  letterSpacing: "0.08em",
+  textTransform: "lowercase",
+  boxShadow: "0 0 28px rgba(255,80,170,0.08)",
 };
