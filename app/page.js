@@ -6,9 +6,10 @@ import {
   Camera,
   MessageCircle,
   Radio,
-  Sparkles,
   Play,
   ArrowUpRight,
+  Star,
+  Sparkles,
 } from "lucide-react";
 
 function formatFollowers(value) {
@@ -25,7 +26,7 @@ const stagger = {
   hidden: {},
   show: {
     transition: {
-      staggerChildren: 0.12,
+      staggerChildren: 0.11,
       delayChildren: 0.08,
     },
   },
@@ -34,12 +35,12 @@ const stagger = {
 function FloatingParticles() {
   const particles = useMemo(
     () =>
-      Array.from({ length: 18 }, (_, i) => ({
+      Array.from({ length: 24 }, (_, i) => ({
         id: i,
         left: `${Math.random() * 100}%`,
         top: `${Math.random() * 100}%`,
         size: 2 + Math.random() * 4,
-        duration: 5 + Math.random() * 5,
+        duration: 5 + Math.random() * 6,
         delay: Math.random() * 4,
       })),
     []
@@ -64,12 +65,12 @@ function FloatingParticles() {
             width: p.size,
             height: p.size,
             borderRadius: "999px",
-            background: "rgba(255,255,255,0.78)",
-            boxShadow: "0 0 18px rgba(255,80,170,0.22)",
+            background: "rgba(255,255,255,0.72)",
+            boxShadow: "0 0 18px rgba(255,80,170,0.18)",
           }}
           animate={{
             y: [0, -22, 0],
-            x: [0, p.id % 2 === 0 ? 7 : -7, 0],
+            x: [0, p.id % 2 === 0 ? 8 : -8, 0],
             opacity: [0.08, 0.55, 0.1],
             scale: [1, 1.15, 1],
           }}
@@ -85,8 +86,103 @@ function FloatingParticles() {
   );
 }
 
-function InteractiveCard({ children, href, style, delay = 0, target = "_blank", rel = "noreferrer" }) {
-  const [glow, setGlow] = useState({ x: "50%", y: "50%", visible: 0 });
+function RollingDigit({ char }) {
+  const digits = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+  const isDigit = /\d/.test(char);
+
+  if (!isDigit) {
+    return (
+      <span
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minWidth: char === "." ? "0.38em" : "0.55em",
+        }}
+      >
+        {char}
+      </span>
+    );
+  }
+
+  const index = digits.indexOf(char);
+
+  return (
+    <span
+      style={{
+        position: "relative",
+        display: "inline-flex",
+        width: "0.68em",
+        height: "1em",
+        overflow: "hidden",
+      }}
+    >
+      <motion.span
+        animate={{ y: `-${index}em` }}
+        transition={{
+          type: "spring",
+          stiffness: 170,
+          damping: 20,
+          mass: 0.8,
+        }}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          lineHeight: 1,
+          color: "#ff5aaa",
+        }}
+      >
+        {digits.map((d) => (
+          <span
+            key={d}
+            style={{
+              height: "1em",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {d}
+          </span>
+        ))}
+      </motion.span>
+    </span>
+  );
+}
+
+function RollingCounter({ value }) {
+  const formatted = formatFollowers(value);
+
+  return (
+    <span
+      aria-label={formatted}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "0.02em",
+      }}
+    >
+      {formatted.split("").map((char, i) => (
+        <RollingDigit key={`${char}-${i}`} char={char} />
+      ))}
+    </span>
+  );
+}
+
+function InteractiveCard({
+  children,
+  href,
+  style,
+  delay = 0,
+  target = "_blank",
+  rel = "noreferrer",
+  featured = false,
+}) {
+  const [glow, setGlow] = useState({
+    x: "50%",
+    y: "50%",
+    visible: 0,
+  });
 
   return (
     <motion.a
@@ -96,9 +192,9 @@ function InteractiveCard({ children, href, style, delay = 0, target = "_blank", 
       initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.16 }}
-      transition={{ duration: 0.5, delay }}
-      whileHover={{ y: -8, scale: 1.018 }}
-      whileTap={{ scale: 0.992 }}
+      transition={{ duration: 0.52, delay }}
+      whileHover={{ y: -9, scale: featured ? 1.02 : 1.015 }}
+      whileTap={{ scale: 0.988 }}
       onMouseMove={(e) => {
         const rect = e.currentTarget.getBoundingClientRect();
         setGlow({
@@ -122,7 +218,9 @@ function InteractiveCard({ children, href, style, delay = 0, target = "_blank", 
           opacity: glow.visible,
           transition: "opacity 0.28s ease",
           pointerEvents: "none",
-          background: `radial-gradient(240px circle at ${glow.x} ${glow.y}, rgba(255,90,170,0.18), transparent 42%)`,
+          background: featured
+            ? `radial-gradient(260px circle at ${glow.x} ${glow.y}, rgba(255,80,170,0.20), transparent 42%)`
+            : `radial-gradient(220px circle at ${glow.x} ${glow.y}, rgba(255,255,255,0.10), transparent 40%)`,
         }}
       />
       <div
@@ -131,23 +229,38 @@ function InteractiveCard({ children, href, style, delay = 0, target = "_blank", 
           inset: 0,
           borderRadius: "inherit",
           boxShadow: glow.visible
-            ? "inset 0 0 0 1px rgba(255,255,255,0.14), 0 24px 70px rgba(255,90,170,0.10)"
+            ? featured
+              ? "inset 0 0 0 1px rgba(255,110,190,0.22), 0 24px 70px rgba(255,90,170,0.14)"
+              : "inset 0 0 0 1px rgba(255,255,255,0.14), 0 24px 70px rgba(255,255,255,0.06)"
+            : featured
+            ? "inset 0 0 0 1px rgba(255,90,170,0.18)"
             : "inset 0 0 0 1px rgba(255,255,255,0.02)",
           transition: "all 0.28s ease",
           pointerEvents: "none",
         }}
       />
+      {featured && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(135deg, rgba(255,80,170,0.06), transparent 36%, rgba(80,220,255,0.05) 100%)",
+            pointerEvents: "none",
+          }}
+        />
+      )}
       <div style={{ position: "relative", zIndex: 2 }}>{children}</div>
     </motion.a>
   );
 }
-
 export default function Page() {
   const [user, setUser] = useState(null);
-  const [error, setError] = useState("");
   const [displayFollowers, setDisplayFollowers] = useState(0);
   const [updatedAt, setUpdatedAt] = useState("");
   const [status, setStatus] = useState("loading");
+  const [error, setError] = useState("");
+  const [scrolled, setScrolled] = useState(false);
 
   const animatedValueRef = useRef(0);
   const animationRef = useRef(null);
@@ -160,6 +273,7 @@ export default function Page() {
       action: "Ver contenido",
       href: "https://www.tiktok.com/@icalexir",
       icon: Play,
+      featured: true,
     },
     {
       label: "Instagram",
@@ -167,6 +281,7 @@ export default function Page() {
       action: "Ver perfil",
       href: "https://www.instagram.com/icalexir/",
       icon: Camera,
+      featured: false,
     },
     {
       label: "Kick",
@@ -174,6 +289,7 @@ export default function Page() {
       action: "Ver stream",
       href: "https://kick.com/icalexirk",
       icon: Radio,
+      featured: false,
     },
     {
       label: "WhatsApp",
@@ -181,6 +297,7 @@ export default function Page() {
       action: "Escríbeme",
       href: "https://wa.me/593978997065",
       icon: MessageCircle,
+      featured: false,
     },
   ];
 
@@ -232,6 +349,13 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
     if (!user?.follower_count && user?.follower_count !== 0) return;
 
     const start = animatedValueRef.current;
@@ -239,7 +363,7 @@ export default function Page() {
 
     if (start === target) return;
 
-    const duration = 1100;
+    const duration = 1000;
     const startTime = performance.now();
 
     const animate = (time) => {
@@ -274,6 +398,7 @@ export default function Page() {
           'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         overflowX: "hidden",
         position: "relative",
+        scrollSnapType: "y proximity",
       }}
     >
       <FloatingParticles />
@@ -283,9 +408,19 @@ export default function Page() {
           position: "absolute",
           inset: 0,
           background:
-            "linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px)",
+            "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
           backgroundSize: "34px 34px",
           opacity: 0.08,
+          pointerEvents: "none",
+        }}
+      />
+
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "radial-gradient(circle at 20% 18%, rgba(255,80,170,0.05), transparent 20%), radial-gradient(circle at 78% 14%, rgba(90,220,255,0.05), transparent 18%), radial-gradient(circle at 50% 70%, rgba(255,255,255,0.015), transparent 22%)",
           pointerEvents: "none",
         }}
       />
@@ -295,9 +430,15 @@ export default function Page() {
           position: "sticky",
           top: 0,
           zIndex: 50,
-          backdropFilter: "blur(16px)",
-          background: "rgba(5,5,5,0.72)",
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          backdropFilter: scrolled ? "blur(22px)" : "blur(12px)",
+          background: scrolled ? "rgba(5,5,5,0.78)" : "rgba(5,5,5,0.54)",
+          borderBottom: scrolled
+            ? "1px solid rgba(255,255,255,0.10)"
+            : "1px solid rgba(255,255,255,0.06)",
+          boxShadow: scrolled
+            ? "0 10px 30px rgba(0,0,0,0.22)"
+            : "0 0 0 rgba(0,0,0,0)",
+          transition: "all 0.28s ease",
         }}
       >
         <div
@@ -317,7 +458,7 @@ export default function Page() {
               style={{
                 fontSize: "20px",
                 fontWeight: 900,
-                letterSpacing: "0.04em",
+                letterSpacing: "0.02em",
                 textTransform: "lowercase",
               }}
             >
@@ -335,7 +476,7 @@ export default function Page() {
       </header>
 
       <main>
-        <section id="inicio">
+        <section id="inicio" style={sectionSnap}>
           <div
             style={{
               maxWidth: "1220px",
@@ -362,13 +503,13 @@ export default function Page() {
 
                 <motion.h1
                   variants={fadeUp}
-                  transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.78, ease: [0.22, 1, 0.36, 1] }}
                   style={{
                     margin: "22px 0 0 0",
                     fontSize: "clamp(56px, 10vw, 118px)",
                     lineHeight: 0.88,
                     fontWeight: 900,
-                    letterSpacing: "-0.05em",
+                    letterSpacing: "-0.06em",
                     textTransform: "uppercase",
                   }}
                 >
@@ -392,13 +533,13 @@ export default function Page() {
 
                 <motion.h2
                   variants={fadeUp}
-                  transition={{ duration: 0.82, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.84, ease: [0.22, 1, 0.36, 1] }}
                   style={{
                     margin: "30px 0 0 0",
                     fontSize: "clamp(34px, 5.5vw, 72px)",
                     lineHeight: 0.95,
                     fontWeight: 900,
-                    letterSpacing: "-0.04em",
+                    letterSpacing: "-0.05em",
                     maxWidth: "760px",
                   }}
                 >
@@ -406,7 +547,7 @@ export default function Page() {
                   <span
                     style={{
                       display: "block",
-                      background: "linear-gradient(90deg, #ff4ea4, #ffffff, #6ee7ff)",
+                      background: "linear-gradient(90deg, #ff4ea4, #ffd0ea 32%, #ffffff 58%)",
                       WebkitBackgroundClip: "text",
                       color: "transparent",
                     }}
@@ -420,13 +561,13 @@ export default function Page() {
                   transition={{ duration: 0.82, ease: [0.22, 1, 0.36, 1] }}
                   style={{
                     marginTop: "22px",
-                    maxWidth: "670px",
-                    color: "rgba(255,255,255,0.62)",
+                    maxWidth: "680px",
+                    color: "rgba(255,255,255,0.66)",
                     fontSize: "18px",
                     lineHeight: 1.9,
                   }}
                 >
-                  Creador de contenido y estudiante audiovisual. Aquí encuentras todas mis redes y formas de contacto.
+                  Centralizo aquí mi contenido, comunidad y oportunidades de trabajo con una estética más urbana, premium y con presencia real.
                 </motion.p>
 
                 <motion.div
@@ -441,10 +582,10 @@ export default function Page() {
                   <motion.a
                     whileHover={{
                       y: -2,
-                      scale: 1.02,
-                      boxShadow: "0 0 42px rgba(255,78,164,0.38)",
+                      scale: 1.022,
+                      boxShadow: "0 0 44px rgba(255,78,164,0.38), 0 12px 30px rgba(0,0,0,0.22)",
                     }}
-                    whileTap={{ scale: 0.985 }}
+                    whileTap={{ scale: 0.982 }}
                     transition={{ duration: 0.22 }}
                     href="https://www.instagram.com/channel/AbaWPIu14iKSAHJD/"
                     target="_blank"
@@ -457,9 +598,10 @@ export default function Page() {
                   <motion.a
                     whileHover={{
                       y: -2,
-                      scale: 1.02,
-                      boxShadow: "0 0 28px rgba(255,255,255,0.08)",
-                      borderColor: "rgba(255,255,255,0.22)",
+                      scale: 1.018,
+                      boxShadow: "0 0 30px rgba(255,255,255,0.08)",
+                      borderColor: "rgba(255,255,255,0.24)",
+                      background: "rgba(255,255,255,0.05)",
                     }}
                     whileTap={{ scale: 0.985 }}
                     transition={{ duration: 0.22 }}
@@ -500,7 +642,6 @@ export default function Page() {
                         display: "block",
                         objectFit: "cover",
                         objectPosition: "center",
-                        transition: "transform 0.7s ease",
                       }}
                     />
 
@@ -509,7 +650,7 @@ export default function Page() {
                         position: "absolute",
                         inset: 0,
                         background:
-                          "linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.16), transparent)",
+                          "linear-gradient(to top, rgba(0,0,0,0.92), rgba(0,0,0,0.18), transparent)",
                       }}
                     />
 
@@ -517,7 +658,8 @@ export default function Page() {
                       style={{
                         position: "absolute",
                         inset: 0,
-                        boxShadow: "inset 0 0 120px rgba(255,80,170,0.12)",
+                        boxShadow:
+                          "inset 0 0 120px rgba(255,80,170,0.10), inset 0 0 60px rgba(90,220,255,0.06)",
                         pointerEvents: "none",
                       }}
                     />
@@ -537,15 +679,16 @@ export default function Page() {
                     >
                       <div>
                         <div style={miniBadge}>
-                          retrato oficial
+                          Retrato oficial
                         </div>
 
                         <p
                           style={{
                             margin: "16px 0 0 0",
-                            color: "rgba(255,255,255,0.72)",
-                            maxWidth: "420px",
+                            color: "rgba(255,255,255,0.78)",
+                            maxWidth: "440px",
                             lineHeight: 1.8,
+                            fontWeight: 600,
                           }}
                         >
                           Presencia visual, identidad propia y una landing con carácter.
@@ -553,8 +696,8 @@ export default function Page() {
                       </div>
 
                       <div style={statusCard}>
-                        <div style={statusLabel}>estado</div>
-                        <div style={statusValue}>creativo activo</div>
+                        <div style={statusLabel}>Estado</div>
+                        <div style={statusValue}>Creativo activo</div>
                       </div>
                     </div>
                   </motion.div>
@@ -564,7 +707,7 @@ export default function Page() {
           </div>
         </section>
 
-        <section id="redes">
+        <section id="redes" style={sectionSnap}>
           <div
             style={{
               maxWidth: "1220px",
@@ -596,9 +739,10 @@ export default function Page() {
                   fontSize: "clamp(28px, 4vw, 44px)",
                   fontWeight: 900,
                   textTransform: "uppercase",
+                  letterSpacing: "-0.03em",
                 }}
               >
-                Mis redes sociales
+                MIS REDES SOCIALES
               </div>
 
               <div
@@ -611,13 +755,25 @@ export default function Page() {
               >
                 {socials.map((item, index) => {
                   const Icon = item.icon;
+                  const featured = !!item.featured;
 
                   return (
                     <InteractiveCard
                       key={item.label}
                       href={item.href}
                       delay={index * 0.06}
-                      style={socialCard}
+                      style={{
+                        ...socialCard,
+                        gridColumn: featured ? "span 2" : "span 1",
+                        minHeight: featured ? "245px" : "215px",
+                        border: featured
+                          ? "1px solid rgba(255,90,170,0.20)"
+                          : "1px solid rgba(255,255,255,0.08)",
+                        background: featured
+                          ? "linear-gradient(180deg, rgba(255,70,160,0.06), rgba(255,255,255,0.025))"
+                          : socialCard.background,
+                      }}
+                      featured={featured}
                     >
                       <div
                         style={{
@@ -629,7 +785,9 @@ export default function Page() {
                       >
                         <div
                           style={{
-                            color: "rgba(255,255,255,0.4)",
+                            color: featured
+                              ? "rgba(255,220,236,0.74)"
+                              : "rgba(255,255,255,0.4)",
                             fontSize: "11px",
                             letterSpacing: "0.18em",
                             textTransform: "uppercase",
@@ -641,18 +799,47 @@ export default function Page() {
                         <motion.div
                           whileHover={{ scale: 1.08, rotate: -4 }}
                           transition={{ duration: 0.22 }}
-                          style={iconWrap}
+                          style={{
+                            ...iconWrap,
+                            boxShadow: featured
+                              ? "0 0 24px rgba(255,90,170,0.12)"
+                              : iconWrap.boxShadow,
+                          }}
                         >
                           <Icon size={18} strokeWidth={2.1} />
                         </motion.div>
                       </div>
 
+                      {featured && (
+                        <div
+                          style={{
+                            marginTop: "14px",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            padding: "8px 12px",
+                            borderRadius: "999px",
+                            background: "rgba(255,90,170,0.08)",
+                            border: "1px solid rgba(255,90,170,0.18)",
+                            color: "#ff7db9",
+                            fontSize: "10px",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.16em",
+                            width: "fit-content",
+                          }}
+                        >
+                          <Star size={12} />
+                          principal
+                        </div>
+                      )}
+
                       <div
                         style={{
-                          marginTop: "18px",
-                          fontSize: "26px",
-                          fontWeight: 800,
+                          marginTop: featured ? "18px" : "28px",
+                          fontSize: featured ? "36px" : "26px",
+                          fontWeight: 900,
                           textTransform: "uppercase",
+                          letterSpacing: "-0.03em",
                         }}
                       >
                         {item.label}
@@ -668,14 +855,16 @@ export default function Page() {
                           gap: "8px",
                           padding: "10px 14px",
                           borderRadius: "999px",
-                          border: "1px solid rgba(255,255,255,0.1)",
-                          background: "rgba(0,0,0,0.22)",
+                          border: featured
+                            ? "1px solid rgba(255,120,185,0.20)"
+                            : "1px solid rgba(255,255,255,0.1)",
+                          background: featured
+                            ? "rgba(255,80,170,0.06)"
+                            : "rgba(0,0,0,0.22)",
                           fontSize: "11px",
                           textTransform: "uppercase",
                           letterSpacing: "0.18em",
-                          color: "rgba(255,255,255,0.78)",
-                          transition: "all 0.28s ease",
-                          boxShadow: "0 0 0 rgba(0,0,0,0)",
+                          color: "rgba(255,255,255,0.82)",
                         }}
                       >
                         {item.action}
@@ -688,8 +877,7 @@ export default function Page() {
             </motion.div>
           </div>
         </section>
-
-        <section id="contador">
+<section id="contador" style={sectionSnap}>
           <div
             style={{
               maxWidth: "1220px",
@@ -722,7 +910,7 @@ export default function Page() {
                       textTransform: "uppercase",
                     }}
                   >
-                    contador real de seguidores
+                    CONTADOR REAL DE SEGUIDORES
                   </div>
 
                   <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "16px" }}>
@@ -759,14 +947,14 @@ export default function Page() {
                   textShadow:
                     status === "online"
                       ? [
-                          "0 0 18px rgba(255,78,164,0.20)",
-                          "0 0 36px rgba(255,78,164,0.34)",
-                          "0 0 18px rgba(255,78,164,0.20)",
+                          "0 0 12px rgba(255,78,164,0.16)",
+                          "0 0 26px rgba(255,78,164,0.28)",
+                          "0 0 12px rgba(255,78,164,0.16)",
                         ]
-                      : "0 0 18px rgba(255,255,255,0.08)",
+                      : "0 0 12px rgba(255,255,255,0.06)",
                 }}
                 transition={{
-                  duration: 2.4,
+                  duration: 2.2,
                   repeat: Infinity,
                   ease: "easeInOut",
                 }}
@@ -775,11 +963,11 @@ export default function Page() {
                   fontSize: "clamp(54px, 10vw, 108px)",
                   lineHeight: 0.95,
                   fontWeight: 900,
-                  letterSpacing: "-0.04em",
-                  color: status === "offline" ? "#ffffff" : "#ff4ea4",
+                  letterSpacing: "-0.05em",
+                  color: status === "offline" ? "#ffffff" : "#ff5aaa",
                 }}
               >
-                {formatFollowers(displayFollowers)}
+                <RollingCounter value={displayFollowers} />
               </motion.div>
 
               <div
@@ -791,7 +979,7 @@ export default function Page() {
                   fontSize: "12px",
                 }}
               >
-                seguidores en TikTok
+                SEGUIDORES EN TIKTOK
               </div>
 
               <div
@@ -829,7 +1017,7 @@ export default function Page() {
           </div>
         </section>
 
-        <section id="contacto">
+        <section id="contacto" style={sectionSnap}>
           <div
             style={{
               maxWidth: "1220px",
@@ -852,7 +1040,7 @@ export default function Page() {
                   color: "rgba(255,255,255,0.36)",
                 }}
               >
-                contacto / acceso
+                CONTACTO / ACCESO
               </div>
 
               <a
@@ -867,11 +1055,11 @@ export default function Page() {
                   fontSize: "clamp(28px, 5vw, 52px)",
                   lineHeight: 1,
                   fontWeight: 900,
-                  letterSpacing: "0.08em",
+                  letterSpacing: "0.06em",
                   textTransform: "uppercase",
                 }}
               >
-                @icalexir
+                @ICALEXIR
               </a>
 
               <div
@@ -894,8 +1082,12 @@ export default function Page() {
   );
 }
 
+const sectionSnap = {
+  scrollSnapAlign: "start",
+};
+
 const navLink = {
-  color: "rgba(255,255,255,0.72)",
+  color: "rgba(255,255,255,0.76)",
   textDecoration: "none",
   fontSize: "12px",
   letterSpacing: "0.18em",
@@ -911,8 +1103,8 @@ const badge = {
   borderRadius: "999px",
   border: "1px solid rgba(255,255,255,0.1)",
   background: "rgba(255,255,255,0.04)",
-  color: "rgba(255,255,255,0.72)",
-  letterSpacing: "0.04em",
+  color: "rgba(255,255,255,0.74)",
+  letterSpacing: "0.02em",
   fontSize: "12px",
   boxShadow: "0 0 24px rgba(255,255,255,0.03)",
 };
@@ -930,20 +1122,21 @@ const glassWrap = {
 const primaryButton = {
   textDecoration: "none",
   color: "#fff",
-  background: "linear-gradient(135deg, #d10071, #ff3f98)",
+  background: "linear-gradient(135deg, #ff4a9f, #ff7bbd)",
   padding: "15px 24px",
   borderRadius: "18px",
   fontWeight: 800,
   letterSpacing: "0.18em",
   textTransform: "uppercase",
-  boxShadow: "0 0 40px rgba(209,0,113,0.35)",
+  boxShadow: "0 0 34px rgba(255,80,170,0.26)",
   fontSize: "13px",
   transition: "all 0.28s ease",
+  border: "1px solid rgba(255,255,255,0.10)",
 };
 
 const secondaryButton = {
   textDecoration: "none",
-  color: "rgba(255,255,255,0.78)",
+  color: "rgba(255,255,255,0.84)",
   padding: "15px 22px",
   borderRadius: "18px",
   border: "1px solid rgba(255,255,255,0.14)",
@@ -984,7 +1177,7 @@ const statusLabel = {
 const statusValue = {
   marginTop: "10px",
   fontSize: "18px",
-  fontWeight: 800,
+  fontWeight: 900,
   textTransform: "uppercase",
 };
 
@@ -993,7 +1186,6 @@ const socialCard = {
   color: "white",
   background:
     "linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.025))",
-  border: "1px solid rgba(255,255,255,0.08)",
   borderRadius: "28px",
   padding: "20px",
   boxSizing: "border-box",
@@ -1036,7 +1228,7 @@ const onlineBadge = {
   borderRadius: "999px",
   background: "rgba(34,211,238,0.1)",
   border: "1px solid rgba(34,211,238,0.22)",
-  color: "#6ee7ff",
+  color: "#7deaff",
   fontSize: "11px",
   letterSpacing: "0.18em",
   textTransform: "uppercase",
@@ -1114,7 +1306,7 @@ const infoLabel = {
 const infoValue = {
   marginTop: "10px",
   fontSize: "20px",
-  fontWeight: 800,
+  fontWeight: 900,
 };
 
 const footerGlow = {
@@ -1125,9 +1317,9 @@ const footerGlow = {
   borderRadius: "999px",
   background: "rgba(255,255,255,0.04)",
   border: "1px solid rgba(255,255,255,0.08)",
-  color: "rgba(255,255,255,0.72)",
+  color: "rgba(255,255,255,0.74)",
   fontSize: "12px",
-  letterSpacing: "0.08em",
+  letterSpacing: "0.06em",
   textTransform: "lowercase",
   boxShadow: "0 0 28px rgba(255,80,170,0.08)",
 };
